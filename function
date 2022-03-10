@@ -1,0 +1,99 @@
+void swap(int *a, int *b) {
+  int s=*a;
+  *a=*b;
+  *b=s;
+}
+
+int partition(int T[], int p, int k) {
+  int pivot = T[k];
+  int i = (p-1);
+  for (int j=p; j<k; j++) {
+    if (T[j]<=pivot) {
+      i++;
+      swap(&T[i], &T[j]);
+    }
+  }
+  swap(&T[i+1],&T[k]);
+  return (i + 1);
+}
+
+
+void quicksort(int T[], int p, int k)
+{//time complexity:O(nlog n)
+    if (p<k) {
+    int s = partition(T,p,k);
+    quicksort(T, p, s - 1);
+    quicksort(T, s + 1, k);
+  }
+}
+
+int binsearch(int T[], int x, int p, int k)
+{//Binsearch finding last occurrence of integer x in array T
+    while(p<k)// time complexity:O(log n)
+    {
+        int s=(p+k+1)/2;
+        if(T[s]>x)k=s-1;
+        else p=s;
+    }
+    return k;
+}
+
+bool in_array(int T[], int n, int x)//time complexity: O(log n)
+{//Function finding whether array contains given element. time complexity:O(log n)
+    int in=binsearch(T,x,0,n-1);
+    return (T[in]==x);
+}
+
+
+bool prime(int n)//time complexity:O(n)
+{//primality test
+    if(n==2||n==3)return true;
+    bool p=(n>1&&n%2&&n%3);
+    int is=25;//is=i^2
+    for(int i=5;  is<=n&&p;  i+=6)//We’ve already checked if n is divisible by 3 or 2,
+    {
+        p=(n%i&&n%(i+2));
+        is=is+12*i+36;
+    }//We compute the value of (i+6)^2 using the value of i^2, to avoid  using sqrt(n) or i*=i, which has much higher complexity
+    return p;
+}
+
+int bad_numbers(int **P, int B[], int b)//time complexity:O(b*log b) (worst case)
+{//A function that creates a sorted array of integers that are present a prime number of times in sequence B and returns its size.
+    int *T=(int*)malloc(b*sizeof(int));
+    int s=0;//size of P
+    int p=0;
+    while(p<b)//for all i<p B[i]<B[p]
+    {
+        int q=binsearch(B,B[p],p,b-1);//B[p]=B[q] anf for all i>q  B[i]>B[p]
+        if(prime(q+1-p))//thus B[p] is present in B q+1-p times
+        {
+            T[s]=B[p];
+            s++;
+        }
+        p=q+1;
+    }
+    T=realloc(T,s*sizeof(int));
+    *P=T;
+    return s;
+}
+
+void funkcja(int A[], int a, int B[], int b, int **C)
+{//function described in the task
+    int *T=(int*)malloc(a*sizeof(int));
+    quicksort(B,0,b-1);
+    int* P;//An array of elements that cannot appear in array C
+    int s=bad_numbers(&P,B,b);//size of this array
+    int c=0;//size of array C
+    for(int i=0; i<a; i++)
+    {
+        if(!in_array(P,s,A[i]))
+        {
+            T[c]=A[i];
+            c++;
+        }
+    }
+    T=realloc(T,c*sizeof(int));
+    free(P);
+    *C=T;
+}
